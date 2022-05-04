@@ -28,12 +28,19 @@ void send_(tcp::socket & socket, const string& message) {
 
 void read_struct(tcp::socket & socket,int num_elements, Shares* data) {
     cout << "Before reading of data\n";
-    boost::system::error_code ec;
-    int garb_arr[3];
-    read(socket , boost::asio::buffer(&data,((num_elements)*sizeof(Shares))), ec);  
-    
+    Shares fin_data[num_elements];
     for(int i=0;i<num_elements;i++) {
-        cout << data[i].Delta << " "<< data[i].delta << "\n";
+        boost::system::error_code ec;
+        uint64_t arr[2];
+        read(socket , boost::asio::buffer(&arr,sizeof(arr)), ec); 
+        Shares temp;
+        temp.Delta = arr[0];
+        temp.delta = arr[1];
+        fin_data[i] = temp; 
+    }
+
+    for(int i=0;i<num_elements;i++) {
+        cout << fin_data[i].Delta << " " << fin_data[i].delta << endl;
     }
 
     return;
@@ -76,10 +83,6 @@ int main(int argc,char* argv[]) {
     read_struct(socket_, num_elements, data);
 
     socket_.close();
-
-    for(int i=0;i<num_elements;i++) {
-        cout << data[i].Delta << " , " << data[i].delta << "\n";
-    }
 
 }
 

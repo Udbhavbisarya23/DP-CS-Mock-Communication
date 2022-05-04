@@ -11,6 +11,8 @@
 #include <boost/serialization/string.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include "../fixed-point.h"
+
 using namespace boost::asio;
 namespace po = boost::program_options;  
 using ip::tcp;  
@@ -21,6 +23,7 @@ using std::endl;
 struct Options {
   int cs0_port;
   int cs1_port;
+  std::size_t fractional_bits;
   std::filesystem::path filename;
 };
 
@@ -32,6 +35,7 @@ std::optional<Options> parse_program_options(int argc, char* argv[]) {
     ("help,h", po::bool_switch()->default_value(false),"produce help message")
     ("compute-server0-port", po::value<int>()->required(), "Port number of compute server 0")
     ("compute-server1-port", po::value<int>()->required(), "Port number of compute server 1")
+    ("fractional-bits", po::value<size_t>()->required(), "Number of fractional bits")
     ("dp-id", po::value<int>()->required(), "Id of the data provider")
     ;
   // clang-format on
@@ -46,6 +50,8 @@ std::optional<Options> parse_program_options(int argc, char* argv[]) {
   
   options.cs0_port = vm["compute-server0-port"].as<int>();
   options.cs1_port = vm["compute-server1-port"].as<int>();
+
+  options.fractional_bits = vm["fractional-bits"].as<size_t>();
 
   options.filename = std::filesystem::current_path();
   if(vm["dp-id"].as<int>() == 0) {
@@ -74,13 +80,13 @@ struct Shares {
      uint64_t Delta,delta;
 };
 
-void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data, Shares* cs1_data) {
+void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data, Shares* cs1_data, size_t fractional_bits) {
      //get input data
-     std::vector<uint64_t> data;
+     std::vector<float> data;
 
      int count = 0;
 
-     uint64_t temp;
+     float temp;
      while(indata >> temp) {
           data.push_back(temp);
           count++;
@@ -90,7 +96,7 @@ void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data
      }
 
      while(count < num_elements) {
-          data.push_back(0);
+          data.push_back(0.0);
      }
 
      for(int i=0;i<data.size();i++) {
@@ -105,7 +111,7 @@ void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data
           std::uint64_t del0 = blah(gen);
           std::uint64_t del1 = blah(gen);
 
-          std::uint64_t Del =  del0 + del1 + data[i];
+          std::uint64_t Del =  del0 + del1 + encode<uint64_t,float>(data[i],fractional_bits);
           
           //For each data, creating 2 shares variables - 1 for CS0 and another for CS1
           Shares cs0,cs1;
@@ -118,6 +124,8 @@ void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data
 
           cs0_data[i] = cs0;
           cs1_data[i] = cs1;
+
+          std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
      }
 
      return;
@@ -154,15 +162,18 @@ int main(int argc, char* argv[]) {
      // Reading contents from file
      std::ifstream indata;
      indata.open(options->filename);
-     int num_elements;
-     indata >> num_elements;
+     int rows,columns;
+     indata >> rows;
+     indata >> columns;
+
+     int num_elements = rows*columns;
 
      cout << num_elements << "\n";
 
      Shares cs0_data[num_elements];
      Shares cs1_data[num_elements];
      
-     share_generation(indata,num_elements,cs0_data,cs1_data); 
+     share_generation(indata,num_elements,cs0_data,cs1_data,options->fractional_bits); 
 
      indata.close();
 
@@ -181,12 +192,33 @@ int main(int argc, char* argv[]) {
           }  
 
           //connection  
-          socket.connect( tcp::endpoint( boost::asio::ip::address::from_string("127.0.0.1"), port ));      
-          
-          // Send number of elements to compute server  
+          socket.connect( tcp::endpoint( boost::asio::ip::address::from_string("127.0.0.1"), port ));  
 
+          //First send the number of fractional bits to the server
+          boost::system::error_code error_init;
+          boost::asio::write( socket, boost::asio::buffer(&options->fractional_bits,sizeof(options->fractional_bits)), error_init );
+          if( !error_init ) {  
+               cout << "Not an error" << endl;  
+          }  
+          else {  
+               cout << "send failed: " << error_init.message() << endl;  
+          }
+
+          // getting a response from the server  
+          boost::asio::streambuf receive_buffer_init;  
+          boost::asio::read_until(socket, receive_buffer_init, "\n");  
+          if( error_init && error_init != boost::asio::error::eof ) {  
+               cout << "receive failed: " << error_init.message() << endl;  
+          }  
+          else {  
+               const char* data = boost::asio::buffer_cast<const char*>(receive_buffer_init.data());  
+               cout << data << endl;  
+          }        
+          
+          // Send rows and columns to compute server  
+          int arr[2] = {rows,columns};
           boost::system::error_code error;  
-          boost::asio::write( socket, boost::asio::buffer(&num_elements,sizeof(num_elements)), error );  
+          boost::asio::write( socket, boost::asio::buffer(&arr,sizeof(arr)), error );  
           if( !error ) {  
                cout << "Not an error" << endl;  
           }  
@@ -209,9 +241,6 @@ int main(int argc, char* argv[]) {
           auto data = cs0_data;
           if(i) {
                data = cs1_data;
-          }
-          for(int i=0;i<num_elements;i++) {
-               cout << data[i].Delta << " " << data[i].delta << "\n";
           }
           write_struct(socket,data,num_elements);
 

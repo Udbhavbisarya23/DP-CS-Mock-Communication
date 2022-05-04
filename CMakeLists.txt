@@ -1,3 +1,4 @@
-add_subdirectory(mult_dp)
 add_subdirectory(dot_product_dp)
+add_subdirectory(mat_mul_dp)
+add_subdirectory(mult_dp)
 add_subdirectory(trial_server)
