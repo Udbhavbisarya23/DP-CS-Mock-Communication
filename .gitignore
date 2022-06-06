@@ -13,6 +13,8 @@ CMakeScripts
 Testing
 Makefile
 
+*build_/
+
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake

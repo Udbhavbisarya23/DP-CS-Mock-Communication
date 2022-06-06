@@ -8,6 +8,7 @@ if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
 endif ()
 
 add_subdirectory(dot_product_dp)
+add_subdirectory(mat_const_operations_dp)
 add_subdirectory(mat_mul_dp)
 add_subdirectory(mult_dp)
 add_subdirectory(trial_server)
