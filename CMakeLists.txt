@@ -11,6 +11,7 @@ add_subdirectory(dot_product_dp)
 add_subdirectory(mat_const_operations_dp)
 add_subdirectory(mat_mul_dp)
 add_subdirectory(mult_dp)
+add_subdirectory(neural_net_dp)
 add_subdirectory(trial_server)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
