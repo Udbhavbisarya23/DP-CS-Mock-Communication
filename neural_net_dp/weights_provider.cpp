@@ -196,10 +196,36 @@ class Matrix {
                 data.push_back(0.0);
             }
 
-            for(int i=0;i<data.size();i++) {
-                cout << data[i] << " ";
+        }
+
+        void readMatrixCSV() {
+            std::cout << "Reading the matrix from file :- " << fullFileName << std::endl;
+
+            std::ifstream indata;
+            indata.open(fullFileName);
+
+            std::string line;
+            std::getline(indata,line);
+
+            std::stringstream lineStream(line);
+            std::string cell;
+
+            while(std::getline(lineStream,cell, ','))
+            {
+                data.push_back(stof(cell));
             }
-            cout << "\n";
+            // This checks for a trailing comma with no data after it.
+            // if (!lineStream && cell.empty())
+            // {
+            //     // If there was a trailing comma then add an empty element.
+            //     result.push_back("");
+            // }
+        }
+
+        void printData() {
+            for(int i=0;i<data.size();i++) {
+                std::cout << data[i] << " ";
+            }
         }
 
         void generateShares() {
@@ -225,7 +251,7 @@ class Matrix {
                 cs0_data[i] = cs0;
                 cs1_data[i] = cs1;
 
-                std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
+                // std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
             }
 
             return;
@@ -236,6 +262,8 @@ class Matrix {
             std::cout << "Sending to servers\n";
 
             for(int i=0;i<2;i++) {
+
+                std::cin.ignore();
 
                 cout << "\nStart of send to compute server\n";
 
@@ -318,19 +346,43 @@ int main(int argc, char* argv[]) {
 
 
     //dimensions should be 512*784
-    Matrix weightL1 = Matrix(1,1,"/input_dp1.txt");
-    weightL1.readMatrix();
+    Matrix weightL1 = Matrix(512,784,"/W1.csv");
+    weightL1.readMatrixCSV();
     weightL1.generateShares();
     weightL1.sendToServers();
 
 
-    Matrix biasL1 = Matrix(512,1,"L1B.csv");
+    // dimensions should be 512*1
+    Matrix biasL1 = Matrix(512,1,"/B1.csv");
+    biasL1.readMatrixCSV();
+    biasL1.generateShares();
+    biasL1.sendToServers();
 
-    Matrix weightL2 = Matrix(256,512,"L2W.csv");
-    Matrix biasL2 = Matrix(256,1,"L2B.csv");
 
-    Matrix weightL3 = Matrix(10,256,"L3W.csv");
-    Matrix biasL3 = Matrix(10,1,"L3B.csv");
+    // dimensions should be 256*512
+    Matrix weightL2 = Matrix(256,512,"/W2.csv");
+    weightL2.readMatrixCSV();
+    weightL2.generateShares();
+    weightL2.sendToServers();
+
+    // dimensions should be 256*1
+    Matrix biasL2 = Matrix(256,1,"/B2.csv");
+    biasL2.readMatrixCSV();
+    biasL2.generateShares();
+    biasL2.sendToServers();
+
+
+    // dimensions should be 10*256
+    Matrix weightL3 = Matrix(10,256,"/W3.csv");
+    weightL3.readMatrixCSV();
+    weightL3.generateShares();
+    weightL3.sendToServers();
+
+    // dimensions should be 10*1
+    Matrix biasL3 = Matrix(10,1,"/B3.csv");
+    biasL3.readMatrixCSV();
+    biasL3.generateShares();
+    biasL3.sendToServers();
 
      
     return 0;  

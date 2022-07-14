@@ -55,7 +55,7 @@ std::optional<Options> parse_program_options(int argc, char* argv[]) {
 
   options.filename = std::filesystem::current_path();
   if(vm["dp-id"].as<int>() == 0) {
-       options.filename += "/input_dp0.txt";
+       options.filename += "/X.csv";
   } else if(vm["dp-id"].as<int>() == 1) {
        options.filename += "/input_dp1.txt";
   } else {
@@ -132,6 +132,49 @@ void share_generation(std::ifstream & indata, int num_elements, Shares* cs0_data
 
 }
 
+void share_generation_csv(std::ifstream & indata, int num_elements, Shares* cs0_data, Shares* cs1_data, size_t fractional_bits) {
+     //get input data
+     std::vector<float> data;
+
+     std::string line;
+     std::getline(indata,line);
+
+     std::stringstream lineStream(line);
+     std::string cell;
+
+     while(std::getline(lineStream,cell, ','))
+     {
+          data.push_back(stof(cell));
+     }
+
+     //Now that we have data, need to generate the shares
+     for(int i=0;i<data.size();i++){
+          std::random_device rd;
+          std::mt19937 gen(rd());
+          std::uint64_t del0 = blah(gen);
+          std::uint64_t del1 = blah(gen);
+
+          std::uint64_t Del =  del0 + del1 + encode<uint64_t,float>(data[i],fractional_bits);
+          
+          //For each data, creating 2 shares variables - 1 for CS0 and another for CS1
+          Shares cs0,cs1;
+
+          cs0.Delta = Del;
+          cs0.delta = del0;
+
+          cs1.Delta = Del;
+          cs1.delta = del1;
+
+          cs0_data[i] = cs0;
+          cs1_data[i] = cs1;
+
+          std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
+     }
+
+     return;
+
+}
+
 void write_struct(tcp::socket & socket, Shares* data, int num_elements) {
      for(int i=0;i<num_elements;i++) {
           uint64_t arr[2];
@@ -162,9 +205,9 @@ int main(int argc, char* argv[]) {
      // Reading contents from file
      std::ifstream indata;
      indata.open(options->filename);
-     int rows,columns;
-     indata >> rows;
-     indata >> columns;
+     int rows=784,columns=1;
+     // indata >> rows;
+     // indata >> columns;
 
      int num_elements = rows*columns;
 
@@ -173,7 +216,7 @@ int main(int argc, char* argv[]) {
      Shares cs0_data[num_elements];
      Shares cs1_data[num_elements];
      
-     share_generation(indata,num_elements,cs0_data,cs1_data,options->fractional_bits); 
+     share_generation_csv(indata,num_elements,cs0_data,cs1_data,options->fractional_bits); 
 
      indata.close();
 
