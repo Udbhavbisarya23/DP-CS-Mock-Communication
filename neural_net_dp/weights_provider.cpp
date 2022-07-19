@@ -205,14 +205,16 @@ class Matrix {
             indata.open(fullFileName);
 
             std::string line;
-            std::getline(indata,line);
+            while (std::getline(indata,line)) {
 
-            std::stringstream lineStream(line);
-            std::string cell;
+                std::stringstream lineStream(line);
+                std::string cell;
 
-            while(std::getline(lineStream,cell, ','))
-            {
-                data.push_back(stof(cell));
+                while(std::getline(lineStream,cell, ','))
+                {
+                    data.push_back(stof(cell));
+                }
+
             }
             // This checks for a trailing comma with no data after it.
             // if (!lineStream && cell.empty())
@@ -223,9 +225,14 @@ class Matrix {
         }
 
         void printData() {
+            
+            std::cout << "Printing data\n";
+
             for(int i=0;i<data.size();i++) {
                 std::cout << data[i] << " ";
             }
+
+            std::cout << "\n";
         }
 
         void generateShares() {
@@ -376,12 +383,14 @@ int main(int argc, char* argv[]) {
     Matrix weightL3 = Matrix(10,256,"/W3.csv");
     weightL3.readMatrixCSV();
     weightL3.generateShares();
+    //weightL3.printData();
     weightL3.sendToServers();
 
     // dimensions should be 10*1
     Matrix biasL3 = Matrix(10,1,"/B3.csv");
     biasL3.readMatrixCSV();
     biasL3.generateShares();
+    biasL3.printData();
     biasL3.sendToServers();
 
      

@@ -137,14 +137,16 @@ void share_generation_csv(std::ifstream & indata, int num_elements, Shares* cs0_
      std::vector<float> data;
 
      std::string line;
-     std::getline(indata,line);
+     while(std::getline(indata,line)) {
 
-     std::stringstream lineStream(line);
-     std::string cell;
+          std::stringstream lineStream(line);
+          std::string cell;
 
-     while(std::getline(lineStream,cell, ','))
-     {
-          data.push_back(stof(cell));
+          while(std::getline(lineStream,cell, ','))
+          {
+               data.push_back(stof(cell));
+          }
+
      }
 
      //Now that we have data, need to generate the shares
