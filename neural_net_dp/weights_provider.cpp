@@ -160,11 +160,11 @@ class Matrix {
 
 
     public:
-        Matrix(int row, int col, std::string fileName) {
+        Matrix(int row, int col, std::string fileName, std::size_t fraction_bits) {
             rows = row;
             columns = col;
             num_elements = row*col;
-            fractional_bits = 18;
+            fractional_bits = fraction_bits;
 
             fullFileName = std::filesystem::current_path();
             fullFileName += fileName;
@@ -353,27 +353,27 @@ int main(int argc, char* argv[]) {
 
 
     //dimensions should be 512*784
-    Matrix weightL1 = Matrix(256,784,"/W1.csv");
+    Matrix weightL1 = Matrix(256,784,"/W1.csv",options->fractional_bits);
     weightL1.readMatrixCSV();
     weightL1.generateShares();
     weightL1.sendToServers();
 
 
     // dimensions should be 512*1
-    Matrix biasL1 = Matrix(256,1,"/B1.csv");
+    Matrix biasL1 = Matrix(256,1,"/B1.csv",options->fractional_bits);
     biasL1.readMatrixCSV();
     biasL1.generateShares();
     biasL1.sendToServers();
 
 
     // dimensions should be 256*512
-    Matrix weightL2 = Matrix(10,256,"/W2.csv");
+    Matrix weightL2 = Matrix(10,256,"/W2.csv",options->fractional_bits);
     weightL2.readMatrixCSV();
     weightL2.generateShares();
     weightL2.sendToServers();
 
     // dimensions should be 256*1
-    Matrix biasL2 = Matrix(10,1,"/B2.csv");
+    Matrix biasL2 = Matrix(10,1,"/B2.csv",options->fractional_bits);
     biasL2.readMatrixCSV();
     biasL2.generateShares();
     biasL2.sendToServers();
