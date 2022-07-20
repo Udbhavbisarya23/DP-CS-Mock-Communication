@@ -353,47 +353,32 @@ int main(int argc, char* argv[]) {
 
 
     //dimensions should be 512*784
-    Matrix weightL1 = Matrix(512,784,"/W1.csv");
+    Matrix weightL1 = Matrix(256,784,"/W1.csv");
     weightL1.readMatrixCSV();
     weightL1.generateShares();
     weightL1.sendToServers();
 
 
     // dimensions should be 512*1
-    Matrix biasL1 = Matrix(512,1,"/B1.csv");
+    Matrix biasL1 = Matrix(256,1,"/B1.csv");
     biasL1.readMatrixCSV();
     biasL1.generateShares();
     biasL1.sendToServers();
 
 
     // dimensions should be 256*512
-    Matrix weightL2 = Matrix(256,512,"/W2.csv");
+    Matrix weightL2 = Matrix(10,256,"/W2.csv");
     weightL2.readMatrixCSV();
     weightL2.generateShares();
     weightL2.sendToServers();
 
     // dimensions should be 256*1
-    Matrix biasL2 = Matrix(256,1,"/B2.csv");
+    Matrix biasL2 = Matrix(10,1,"/B2.csv");
     biasL2.readMatrixCSV();
     biasL2.generateShares();
     biasL2.sendToServers();
 
-
-    // dimensions should be 10*256
-    Matrix weightL3 = Matrix(10,256,"/W3.csv");
-    weightL3.readMatrixCSV();
-    weightL3.generateShares();
-    //weightL3.printData();
-    weightL3.sendToServers();
-
-    // dimensions should be 10*1
-    Matrix biasL3 = Matrix(10,1,"/B3.csv");
-    biasL3.readMatrixCSV();
-    biasL3.generateShares();
-    biasL3.printData();
-    biasL3.sendToServers();
-
-     
+    biasL2.printData();
     return 0;  
 }  
 
