@@ -28,6 +28,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/W1.csv
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/W2.csv
     ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/X.csv
+    ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
 
 target_compile_features(image_provider PRIVATE cxx_std_20)
 
