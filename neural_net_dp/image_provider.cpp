@@ -170,7 +170,7 @@ void share_generation_csv(std::ifstream & indata, int num_elements, Shares* cs0_
           cs0_data[i] = cs0;
           cs1_data[i] = cs1;
 
-          std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
+          //std::cout << "Data = " << data[i] << " Delta = " << cs0.Delta << " delta0 = " << cs0.delta << " delta1 = " <<cs1.delta <<"\n";
      }
 
      return;
